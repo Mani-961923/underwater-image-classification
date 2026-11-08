@@ -9,7 +9,7 @@ A leak-free, statistically tested pipeline for underwater image classification o
 | Dataset | Existing model (reported) | Best published | **Proposed final model** | Macro-F1 | ECE |
 |---|---|---|---|---|---|
 | AQUA20 (20 classes) | 90.0% | 90.69% (ConvNeXt, AQUA20 paper) | **92.80%** | 0.897 | 0.02 |
-| F4K (23 species, leak-free split) | 99.0% (random split) | – | **99.63%** | 0.947 | 0.004 |
+| F4K (23 species, leak-free split) | 99.0% | – | **99.63%** | 0.947 | 0.004 |
 | PlanktonSet (121 classes) | 75.0% | – | **80.22%** | 0.711 | 0.026 |
 
 *Existing model* = ViT-B/16 + CNN soft-voting ensemble (ResNet-18, ResNet-50, DenseNet-121, ViT-B/16) trained with a standard recipe (Adam, constant learning rate, plain cross-entropy).

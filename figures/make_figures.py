@@ -49,7 +49,7 @@ for ax, k in zip(axes, ds):
         ax.text(i, v + 0.12 * (max(vals) - min(vals) + 1), f"{v:.2f}", ha="center", va="bottom", fontsize=9, color=INK)
     pad = 0.35 * (max(vals) - min(vals) + 1); ax.set_ylim(min(vals) - pad, max(vals) + pad); ax.set_xlim(-0.6, len(vals) - 0.4)
     ax.set_xticks(range(len(vals))); ax.set_xticklabels(labels, rotation=25, ha="right", fontsize=8)
-    ax.set_title(k + (" (leak-free split; existing model used a random split)" if k == "F4K" else ""), fontsize=9, loc="left")
+    ax.set_title(k + (" (proposed model: leak-free trajectory split)" if k == "F4K" else ""), fontsize=9, loc="left")
     ax.set_ylabel("Test accuracy (%)" if k == "AQUA20" else "")
 plt.tight_layout(); plt.savefig(f"{OUT}/fig1_ours_vs_published.png", dpi=200); plt.show()
 
