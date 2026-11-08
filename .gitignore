@@ -1,0 +1,16 @@
+# data, model weights and run outputs (too large for git)
+data/
+runs/
+logs/
+*.pt
+*.pth
+*.npy
+*.tar
+*.zip
+aqua20/
+aqua20_img/
+aqua20_256/
+f4k_256/
+plankton_256/
+__pycache__/
+.ipynb_checkpoints/
