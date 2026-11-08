@@ -26,6 +26,26 @@ A leak-free, statistically tested pipeline for underwater image classification o
 4. **Grad-CAM** shows the models attend to the organism. On F4K, only 1.1% of the attention falls on the burned-in timestamp region, so there is no shortcut learning.
 5. **Classical baseline (LBP + SVM):** 46.7% on AQUA20, 80.7% on F4K and 47.5% on PlanktonSet, far below deep models.
 
+## Figures
+
+**Proposed model vs existing model and best published result**
+![Results vs existing and published models](figures/fig1_ours_vs_published.png)
+
+**CLAHE vs original images, 3 seeds per backbone (AQUA20)**
+![CLAHE vs original](figures/fig2_clahe_vs_original_seeds.png)
+
+**Confusion matrix of the final AQUA20 model** (classes ordered by number of training images)
+![Confusion matrix](figures/fig3_confusion_final_aqua20.png)
+
+**F1 per class: proposed final ensemble vs existing model (ViT-B/16)**
+![Per-class F1](figures/fig4_perclass_f1_aqua20.png)
+
+**Reliability diagram:** the proposed calibrated ensemble is closest to perfect calibration (15 bins; bins with fewer than 10 images not drawn)
+<img src="figures/fig5_reliability_aqua20.png" width="420" alt="Reliability diagram">
+
+**Validation macro-F1 per epoch (AQUA20, seed 42)**
+![Training curves](figures/fig6_training_curves_aqua20.png)
+
 ## Final AQUA20 model
 
 12 networks: **ConvNeXt-Small** (`convnext_small.fb_in22k_ft_in1k`) and **EVA-02-Base** (`eva02_base_patch14_448.mim_in22k_ft_in22k_in1k` at 224 px), each trained on original and on CLAHE images with 3 seeds. Each network is temperature-scaled on validation, and the networks are combined by weighted soft voting with weights learned on validation (log-loss, L-BFGS). Every model and ensemble choice was made on **out-of-fold validation**, and the test set was used once.
