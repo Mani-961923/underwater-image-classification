@@ -35,21 +35,23 @@ ours_single = {"AQUA20": 100 * sa[~sa["TTA"]]["acc_mean"].max(),
 ours_final = {"AQUA20": 100 * sig_a["acc_ens"].iloc[0],
               "F4K": 100 * sig_fp[sig_fp.dataset == "f4k"]["acc_final"].iloc[0],
               "PlanktonSet": 100 * sig_fp[sig_fp.dataset == "plankton"]["acc_final"].iloc[0]}
-existing = {"AQUA20": 90.0, "F4K": 99.0, "PlanktonSet": 75.0}      # existing model: best reported accuracy per dataset
-ds = list(existing)
-fig, axes = plt.subplots(1, 3, figsize=(12, 4))
-for ax, k in zip(axes, ds):
-    vals = [existing[k], ours_single[k], ours_final[k]]
-    labels = ["Existing model (reported)", "Proposed: best single model", "Proposed: final ensemble"]
-    if k == "AQUA20":
-        vals.insert(1, 90.69); labels.insert(1, "AQUA20 paper (ConvNeXt)")
-    cols = [MUTED, "#9b9a95", BLUE, ORANGE][-len(vals):] if k == "AQUA20" else [MUTED, BLUE, ORANGE]
+# reference points (hard-coded): standard baseline = this work's equal soft voting / ViT with the baseline recipe;
+# published = Fuad et al. (AQUA20, ConvNeXt) and Ben Tamou et al. 2022 (F4K, random image-level split)
+refs = {"AQUA20":      [("Standard baseline\n(soft voting, this work)", 88.46), ("AQUA20 paper\n(ConvNeXt)", 90.69)],
+        "F4K":         [("Published\n(random split)", 99.86)],
+        "PlanktonSet": [("Standard baseline\n(ViT, this work)", 75.32)]}
+fig, axes = plt.subplots(1, 3, figsize=(12, 4.3))
+for ax, k in zip(axes, ["AQUA20", "F4K", "PlanktonSet"]):
+    labels = [r[0] for r in refs[k]] + ["Proposed:\nbest single model", "Proposed:\nfinal ensemble"]
+    vals = [r[1] for r in refs[k]] + [ours_single[k], ours_final[k]]
+    cols = (["#9b9a95", MUTED] if k == "AQUA20" else [MUTED]) + [BLUE, ORANGE]
     ax.scatter(range(len(vals)), vals, s=90, color=cols, zorder=3)          # dot plot: axis does not start at 0
     for i, v in enumerate(vals):
-        ax.text(i, v + 0.12 * (max(vals) - min(vals) + 1), f"{v:.2f}", ha="center", va="bottom", fontsize=9, color=INK)
-    pad = 0.35 * (max(vals) - min(vals) + 1); ax.set_ylim(min(vals) - pad, max(vals) + pad); ax.set_xlim(-0.6, len(vals) - 0.4)
-    ax.set_xticks(range(len(vals))); ax.set_xticklabels(labels, rotation=25, ha="right", fontsize=8)
-    ax.set_title(k + (" (proposed model: leak-free trajectory split)" if k == "F4K" else ""), fontsize=9, loc="left")
+        ax.text(i + 0.13, v, f"{v:.2f}", ha="left", va="center", fontsize=9, color=INK)       # label to the right of the dot
+    pad = 0.35 * (max(vals) - min(vals) + 1); ax.set_ylim(min(vals) - pad, min(max(vals) + pad, 100.0) if max(vals) > 99 else max(vals) + pad)
+    ax.set_xlim(-0.5, len(vals) - 0.2)
+    ax.set_xticks(range(len(vals))); ax.set_xticklabels([l.replace("\n", " ") for l in labels], rotation=25, ha="right", fontsize=7.5)
+    ax.set_title(k + (" (proposed: leak-free trajectory split)" if k == "F4K" else ""), fontsize=9, loc="left")
     ax.set_ylabel("Test accuracy (%)" if k == "AQUA20" else "")
 plt.tight_layout(); plt.savefig(f"{OUT}/fig1_ours_vs_published.png", dpi=200); plt.show()
 
@@ -86,12 +88,12 @@ ax.set_xlabel("Predicted class"); ax.set_ylabel("True class (training images)")
 ax.set_title("Proposed final AQUA20 model: row-normalised confusion matrix (classes ordered by training size)", fontsize=10, loc="left")
 plt.colorbar(im, fraction=0.04); plt.tight_layout(); plt.savefig(f"{OUT}/fig3_confusion_final_aqua20.png", dpi=200); plt.show()
 
-# ---------- Figure 4: per-class F1, proposed final model vs existing model (ViT) ----------
+# ---------- Figure 4: per-class F1, proposed final model vs ViT ----------
 pv = test_probs("vit_orig_improved_ce_none_s42").argmax(1)
 f_fin = f1_score(yt, pred_f, labels=order, average=None, zero_division=0)
 f_vit = f1_score(yt, pv, labels=order, average=None, zero_division=0)
 fig, ax = plt.subplots(figsize=(11, 4.2)); xx = np.arange(NUM)
-ax.bar(xx - 0.2, f_vit, 0.4, color=MUTED, label="Existing model (ViT-B/16)")
+ax.bar(xx - 0.2, f_vit, 0.4, color=MUTED, label="ViT-B/16 (improved recipe)")
 ax.bar(xx + 0.2, f_fin, 0.4, color=BLUE, label="Proposed final ensemble")
 ax.set_xticks(xx); ax.set_xticklabels([names[k] for k in order], rotation=60, ha="right", fontsize=8)
 ax.set_ylabel("Test F1"); ax.set_ylim(0, 1.05); ax.legend(frameon=False, loc="lower left")
@@ -111,7 +113,7 @@ def rel(p, y, bins=15):
 fig, ax = plt.subplots(figsize=(5, 5))
 ax.plot([0, 1], [0, 1], color=MUTED, linestyle="--", linewidth=1, label="Perfect calibration")
 pb = test_probs("vit_orig_btech_ce_none_s42"); pi = test_probs("vit_orig_improved_ce_none_s42")
-for p, c, lab in [(pb, MUTED, "Existing model (ViT, original recipe)"), (pi, YELLOW, "ViT, improved recipe (label smoothing)"),
+for p, c, lab in [(pb, MUTED, "ViT, baseline recipe"), (pi, YELLOW, "ViT, improved recipe (label smoothing)"),
                   (pf, BLUE, "Proposed calibrated ensemble")]:
     xs, accs, e = rel(p, yt); ax.plot(xs, accs, marker="o", markersize=5, linewidth=2, color=c, label=f"{lab} (ECE {e:.2f})")
 ax.set_xlabel("Predicted confidence"); ax.set_ylabel("Observed accuracy"); ax.set_xlim(0, 1); ax.set_ylim(0, 1)

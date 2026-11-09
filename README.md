@@ -6,13 +6,13 @@ A leak-free, statistically tested pipeline for underwater image classification o
 
 ## Headline results
 
-| Dataset | Existing model (reported) | Best published | **Proposed final model** | Macro-F1 | ECE |
+| Dataset | Best published | Standard baseline (this work) | **Proposed final model** | Macro-F1 | ECE |
 |---|---|---|---|---|---|
-| AQUA20 (20 classes) | 90.0% | 90.69% (ConvNeXt, AQUA20 paper) | **92.80%** | 0.897 | 0.02 |
-| F4K (23 species, leak-free split) | 99.0% | – | **99.63%** | 0.947 | 0.004 |
-| PlanktonSet (121 classes) | 75.0% | – | **80.22%** | 0.711 | 0.026 |
+| AQUA20 (20 classes) | 90.69% (ConvNeXt, AQUA20 paper) | 88.46% | **92.80%** | 0.897 | 0.021 |
+| F4K (23 species, leak-free split) | 99.86% (random image-level split) | – | **99.63%** | 0.947 | 0.004 |
+| PlanktonSet (121 classes) | – | 75.32% | **80.22%** | 0.711 | 0.026 |
 
-*Existing model* = ViT-B/16 + CNN soft-voting ensemble (ResNet-18, ResNet-50, DenseNet-121, ViT-B/16) trained with a standard recipe (Adam, constant learning rate, plain cross-entropy).
+*Standard baseline* = ResNet-18, ResNet-50, DenseNet-121 and ViT-B/16 fine-tuned with a common recipe (Adam, constant learning rate, plain cross-entropy) and combined by equal soft voting (AQUA20), or ViT-B/16 with the same recipe (PlanktonSet), trained here on the same leak-free splits. The published F4K value was obtained on a random split, which leaks video frames between training and test, so it is not directly comparable.
 
 - **AQUA20:** the final model beats the best published result (90.69%) by 2.1 points. Against ViT-B/16 it is right on 65 images where ViT is wrong, versus 24 the other way (McNemar p < 0.0001). Against the best single model, the macro-F1 gain is significant (+0.019, 95% CI [+0.002, +0.041]).
 - **F4K:** 15 errors in 4,022 test images. Against ViT: 20 vs 5 (p = 0.004), macro-F1 95% CI [+0.032, +0.057].
@@ -28,8 +28,8 @@ A leak-free, statistically tested pipeline for underwater image classification o
 
 ## Figures
 
-**Proposed model vs existing model and best published result**
-![Results vs existing and published models](figures/fig1_ours_vs_published.png)
+**Proposed model vs published results and the standard baseline**
+![Results vs published results and baseline](figures/fig1_ours_vs_published.png)
 
 **CLAHE vs original images, 3 seeds per backbone (AQUA20)**
 ![CLAHE vs original](figures/fig2_clahe_vs_original_seeds.png)
@@ -37,7 +37,7 @@ A leak-free, statistically tested pipeline for underwater image classification o
 **Confusion matrix of the final AQUA20 model** (classes ordered by number of training images)
 ![Confusion matrix](figures/fig3_confusion_final_aqua20.png)
 
-**F1 per class: proposed final ensemble vs existing model (ViT-B/16)**
+**F1 per class: proposed final ensemble vs ViT-B/16**
 ![Per-class F1](figures/fig4_perclass_f1_aqua20.png)
 
 **Reliability diagram:** the proposed calibrated ensemble is closest to perfect calibration (15 bins; bins with fewer than 10 images not drawn)
