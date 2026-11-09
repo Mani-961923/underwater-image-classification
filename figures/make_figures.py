@@ -26,7 +26,7 @@ yt = d.loc[d["subset"] == "test", "label"].values
 train_counts = np.bincount(d.loc[d["subset"] == "train", "label"], minlength=NUM)
 def test_probs(run): return softmax(np.load(f"{RUNS[run]}/test_logits.npy"), 1)
 
-# ---------- Figure 1: proposed vs existing / published ----------
+# ---------- Figure 1: proposed vs standard baseline / published ----------
 sa = pd.read_csv(find("final_aqua20_single.csv")); sig_a = pd.read_csv(find("final_aqua20_significance.csv"))
 sfp = pd.read_csv(find("final_f4k_plankton_single.csv")); sig_fp = pd.read_csv(find("final_f4k_plankton_significance.csv"))
 ours_single = {"AQUA20": 100 * sa[~sa["TTA"]]["acc_mean"].max(),
@@ -129,3 +129,48 @@ ax.set_xlabel("Epoch"); ax.set_ylabel("Validation macro-F1"); ax.legend(frameon=
 ax.set_title("Training progress on AQUA20 (improved recipe, seed 42)", fontsize=10, loc="left")
 plt.tight_layout(); plt.savefig(f"{OUT}/fig6_training_curves_aqua20.png", dpi=200); plt.show()
 print("Saved 6 figures to /kaggle/working")
+
+# ---------- Precision and recall (macro and weighted) for the final models and the baselines ----------
+from sklearn.metrics import precision_recall_fscore_support, accuracy_score
+def prf(y, pred, n):
+    out = {"acc": accuracy_score(y, pred)}
+    for avg in ("macro", "weighted"):
+        p, r, f, _ = precision_recall_fscore_support(y, pred, labels=list(range(n)), average=avg, zero_division=0)
+        out.update({f"{avg}_precision": p, f"{avg}_recall": r, f"{avg}_F1": f})
+    return out
+def need(run):
+    if run not in RUNS:
+        print(f"[missing run] {run}; similar runs:", [r for r in RUNS if run.split('_')[0] in r][:10]); return False
+    return True
+rows = []
+# AQUA20
+if all(need(f"{m}_orig_btech_ce_none_s42") for m in ["resnet18", "resnet50", "densenet121", "vit"]):
+    p_base = np.mean([test_probs(f"{m}_orig_btech_ce_none_s42") for m in ["resnet18", "resnet50", "densenet121", "vit"]], 0)
+    rows.append({"dataset": "AQUA20", "model": "Standard baseline (4 nets, baseline recipe, equal soft voting)", **prf(yt, p_base.argmax(1), NUM)})
+rows.append({"dataset": "AQUA20", "model": "ViT-B/16 (improved recipe, seed 42)", **prf(yt, pv, NUM)})
+rows.append({"dataset": "AQUA20", "model": "Proposed final model", **prf(yt, pred_f, NUM)})
+# F4K and PlanktonSet
+for ds, DS in [("f4k", "F4K"), ("plankton", "PlanktonSet")]:
+    if not need(f"{ds}_vit_orig_improved_ce_none_s42"):
+        print(f"[skip] {DS}: attach the notebook 'f4k-plankton-train' as an input"); continue
+    y = np.load(f"{RUNS[f'{ds}_vit_orig_improved_ce_none_s42']}/test_labels.npy")
+    p_fin = np.load(find(f"final_{ds}_test_probs.npy")); n = p_fin.shape[1]
+    assert len(y) == len(p_fin), f"{DS}: label/prediction length mismatch"
+    if ds == "plankton" and need("plankton_vit_orig_btech_ce_none_s42"):
+        rows.append({"dataset": DS, "model": "Standard baseline (ViT-B/16, baseline recipe)", **prf(y, test_probs("plankton_vit_orig_btech_ce_none_s42").argmax(1), n)})
+    rows.append({"dataset": DS, "model": "ViT-B/16 (improved recipe, seed 42)", **prf(y, test_probs(f"{ds}_vit_orig_improved_ce_none_s42").argmax(1), n)})
+    rows.append({"dataset": DS, "model": "Proposed final model", **prf(y, p_fin.argmax(1), n)})
+PR = pd.DataFrame(rows).round(4); PR.to_csv(f"{OUT}/precision_recall_summary.csv", index=False)
+pd.set_option("display.width", 250); pd.set_option("display.max_colwidth", 70)
+print("\n=== PRECISION / RECALL (test) ===\n", PR.to_string(index=False))
+
+# per-class precision / recall of the final AQUA20 model (classes ordered by number of training images)
+p_c, r_c, f_c, n_c = precision_recall_fscore_support(yt, pred_f, labels=list(order), zero_division=0)
+PC = pd.DataFrame({"class": [names[k] for k in order], "train_images": train_counts[order], "test_images": n_c,
+                   "precision": p_c, "recall": r_c, "F1": f_c}).round(3)
+PC.to_csv(f"{OUT}/precision_recall_per_class_aqua20.csv", index=False)
+print("\n=== Final AQUA20 model: per-class precision / recall ===\n", PC.to_string(index=False))
+rare = list(np.argsort(train_counts)[:5])
+pr5, rc5, _, _ = precision_recall_fscore_support(yt, pred_f, labels=rare, average="macro", zero_division=0)
+pr5b, rc5b, _, _ = precision_recall_fscore_support(yt, p_base.argmax(1), labels=rare, average="macro", zero_division=0) if "p_base" in dir() else (np.nan, np.nan, 0, 0)
+print(f"\nBottom-5 classes: precision {pr5:.3f} / recall {rc5:.3f} (final)  vs  {pr5b:.3f} / {rc5b:.3f} (standard baseline)")
