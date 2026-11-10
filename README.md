@@ -18,6 +18,21 @@ A leak-free, statistically tested pipeline for underwater image classification o
 - **F4K:** 15 errors in 4,022 test images. Against ViT: 20 vs 5 (p = 0.004), macro-F1 95% CI [+0.032, +0.057].
 - **PlanktonSet:** against the best single model (ConvNeXt + TTA): 147 vs 114 (p = 0.047), macro-F1 95% CI [+0.005, +0.042].
 
+### Precision and recall (test set)
+
+| Dataset | Model | Macro precision | Macro recall | Macro-F1 | Weighted precision | Weighted recall |
+|---|---|---|---|---|---|---|
+| AQUA20 | Standard baseline | 0.883 | 0.746 | 0.789 | 0.886 | 0.885 |
+| AQUA20 | ViT-B/16 (improved recipe) | 0.912 | 0.833 | 0.862 | 0.904 | 0.903 |
+| AQUA20 | **Proposed final model** | **0.927** | **0.878** | **0.897** | **0.929** | **0.928** |
+| F4K | ViT-B/16 (improved recipe) | 0.909 | 0.910 | 0.901 | 0.991 | 0.993 |
+| F4K | **Proposed final model** | **0.949** | **0.945** | **0.947** | **0.995** | **0.996** |
+| PlanktonSet | Standard baseline | 0.673 | 0.619 | 0.629 | 0.756 | 0.753 |
+| PlanktonSet | ViT-B/16 (improved recipe) | 0.730 | 0.699 | 0.702 | 0.789 | 0.793 |
+| PlanktonSet | **Proposed final model** | **0.744** | **0.703** | **0.711** | **0.796** | **0.802** |
+
+Recall is lower than precision for every model, so the remaining errors are mostly missed images rather than false alarms. The largest gain is in recall: on the five rarest AQUA20 classes the standard baseline reaches precision 0.971 but recall only 0.527, while the final model reaches 0.940 / 0.744. Computed in `figures/make_figures.py` (final-figures notebook).
+
 ## Key findings
 
 1. **Data leakage in standard splits.** In AQUA20, 114 of 1,612 test images (7.1%) have a near-duplicate in the training set (perceptual hash distance ≤ 6). In F4K, a random split puts 79.1% of test images in the same video trajectory as training images. All results here use **group-aware, leak-free splits**, and AQUA20 is also reported on a clean test set (92.52%).
