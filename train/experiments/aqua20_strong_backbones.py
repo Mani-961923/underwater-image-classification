@@ -6,7 +6,7 @@
 run_parallel(["--model convnext --recipe improved --smoke", "--model convnext --recipe improved --smoke --eval_only"],
              ["--model eva02 --recipe improved --smoke",    "--model eva02 --recipe improved --smoke --eval_only"])
 
-# 2) TTA re-evaluation of the 8 existing improved-recipe models (no training, ~2 min each)
+# 2) TTA re-evaluation of the 8 already-trained improved-recipe models (no training, ~2 min each)
 OLD = [f"--model {m} --variant {v} --recipe improved --eval_only" for m in ["vit", "resnet50", "densenet121", "resnet18"] for v in ["orig", "clahe"]]
 NEW = lambda m, v, s: f"--model {m} --variant {v} --recipe improved --seed {s}"
 run_parallel(

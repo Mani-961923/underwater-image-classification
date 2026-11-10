@@ -1,7 +1,7 @@
 # Kaggle notebook: aqua20-training, cell 3 (E1 + E1b)
 # (Kaggle cell code exactly as committed; paths assume /kaggle/input and /kaggle/working)
 
-# ===== CELL 3: E1 (B.Tech recipe) + E1b (improved recipe) on original images =====
+# ===== CELL 3: E1 (baseline recipe) + E1b (improved recipe) on original images =====
 run_parallel(
     ["--model vit --recipe btech",
      "--model resnet18 --recipe btech",

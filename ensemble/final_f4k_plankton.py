@@ -133,7 +133,7 @@ for DS in ["f4k", "plankton"]:
     key = f"{be['pool']} | {'TTA' if be['TTA'] else 'no TTA'} | {be['method']}"
     pe, ps = store[key].argmax(1), bs["_probs"].argmax(1)
     vit = S[(S.model == "vit") & (S.images == "orig") & (~S.TTA)].iloc[0]["_probs"].argmax(1)
-    for name, pb in [(f"best single by val ({bs['model']} {bs['images']}{' +TTA' if bs['TTA'] else ''})", ps), ("ViT original (B.Tech's best architecture)", vit)]:
+    for name, pb in [(f"best single by val ({bs['model']} {bs['images']}{' +TTA' if bs['TTA'] else ''})", ps), ("ViT original (strongest standard-baseline backbone)", vit)]:
         n01, n10, p = mcnemar(pe, pb, yt); lo, hi = boot(pe, pb, yt)
         all_sig.append({"dataset": DS, "final model": key, "vs": name, "acc_final": accuracy_score(yt, pe), "acc_other": accuracy_score(yt, pb),
                         "mF1_final": f1_score(yt, pe, average="macro", zero_division=0), "mF1_other": f1_score(yt, pb, average="macro", zero_division=0),

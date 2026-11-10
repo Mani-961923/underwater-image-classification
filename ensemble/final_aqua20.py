@@ -145,7 +145,7 @@ key = f"{best_ens['pool']} | {'TTA' if best_ens['TTA'] else 'no TTA'} | {best_en
 pe, ps = store[key].argmax(1), best_single[2].argmax(1)
 vit_b = softmax(load(run_name("vit", "orig", 42), False)["test"], 1).argmax(1)
 summary = []
-for name, pb in [(f"best single model by val ({best_single[1]})", ps), ("ViT original seed 42 (B.Tech's best architecture)", vit_b)]:
+for name, pb in [(f"best single model by val ({best_single[1]})", ps), ("ViT original seed 42 (strongest standard-baseline backbone)", vit_b)]:
     n01, n10, p = mcnemar(pe, pb, yt); lo, hi = boot(pe, pb, yt)
     summary.append({"final ensemble vs": name, "acc_ens": accuracy_score(yt, pe), "acc_other": accuracy_score(yt, pb),
                     "mF1_ens": f1_score(yt, pe, average="macro"), "mF1_other": f1_score(yt, pb, average="macro"),

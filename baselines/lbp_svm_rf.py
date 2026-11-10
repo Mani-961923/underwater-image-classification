@@ -12,7 +12,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score, f1_score
 pd.set_option("display.width", 250)
 
-P, R, SIZE = 8, 1, 128                      # 8 neighbours, radius 1, images 128x128 (as in the B.Tech report)
+P, R, SIZE = 8, 1, 128                      # 8 neighbours, radius 1, images 128x128 (common LBP setting)
 GRID = 4                                    # 4x4 spatial grid of LBP histograms (adds "where" to "what texture")
 
 def lbp_features(path):

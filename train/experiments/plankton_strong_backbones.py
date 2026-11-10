@@ -1,7 +1,7 @@
 # Kaggle notebook: plankton-strong, cell 3
 # (Kaggle cell code exactly as committed; paths assume /kaggle/input and /kaggle/working)
 
-# ===== CELL 3: PlanktonSet - TTA for existing models + CLAHE for the 4 proposal models + ConvNeXt/EVA-02 (orig + CLAHE) (~3.5 h) =====
+# ===== CELL 3: PlanktonSet - TTA for already-trained models + CLAHE for the 4 proposal models + ConvNeXt/EVA-02 (orig + CLAHE) (~3.5 h) =====
 C = "--dataset plankton --recipe improved --epochs 12 --patience 4"
 EV = lambda m: f"{C} --model {m} --eval_only"
 J = lambda m, v: f"{C} --model {m} --variant {v}"

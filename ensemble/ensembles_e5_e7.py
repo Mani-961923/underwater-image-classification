@@ -19,7 +19,7 @@ print("Runs found:", len(RUNS))
 
 M4 = ["resnet18", "resnet50", "densenet121", "vit"]
 POOLS = {
-    "AQUA20 | B.Tech recipe, 4 models (E1)":        ("aqua20", [f"{m}_orig_btech_ce_none_s42" for m in M4]),
+    "AQUA20 | baseline recipe, 4 models (E1)":        ("aqua20", [f"{m}_orig_btech_ce_none_s42" for m in M4]),
     "AQUA20 | improved, 4 models (E1b)":            ("aqua20", [f"{m}_orig_improved_ce_none_s42" for m in M4]),
     "AQUA20 | improved, original + CLAHE (8)":      ("aqua20", [f"{m}_{v}_improved_ce_none_s42" for m in M4 for v in ("orig", "clahe")]),
     "F4K | improved, 4 models":                     ("f4k", [f"f4k_{m}_orig_improved_ce_none_s42" for m in M4]),
@@ -151,7 +151,7 @@ for pool, (ds, runs) in POOLS.items():
         rows.append({"method": f"single: {r}", "kind": "single", "T": round(T, 2), "val_macroF1": score(pv, yv, np.ones_like(yv, bool), rare)["macroF1"], **s})
 
     ens = {
-        "E5 soft voting, equal weights (B.Tech method)": (np.mean(Pv_raw, 0), np.mean(Pt_raw, 0), ""),
+        "E5 soft voting, equal weights (standard baseline)": (np.mean(Pv_raw, 0), np.mean(Pt_raw, 0), ""),
         "E6a soft voting + temperature scaling":         (np.mean(Pv_cal, 0), np.mean(Pt_cal, 0), ""),
     }
     wv, wt, w = weighted_voting(Pv_cal, yv, Pt_cal)

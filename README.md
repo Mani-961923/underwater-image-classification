@@ -77,7 +77,7 @@ figures/     code for the report figures
 demo/        Gradio web demo (upload an image → top-5, CLAHE view, Grad-CAM, confidence)
 ```
 
-Each file is the code of one Kaggle notebook cell, exactly as it was run. A training notebook has three cells: `train/train.py` written to `/kaggle/working/train.py` with `%%writefile`, then `train/runner.py`, then one file from `train/experiments/`. Earlier notebooks ran earlier versions of `train.py`; the version here is the final one and supports every experiment.
+Each file is the code of one Kaggle notebook cell, exactly as it was run. A training notebook has three cells: `train/train.py` written to `/kaggle/working/train.py` with `%%writefile`, then `train/runner.py`, then one file from `train/experiments/`. Earlier notebooks ran earlier versions of `train.py`; the version here is the final one and supports every experiment. Some comments and printed labels were reworded after the runs; the code itself is unchanged. The recipe identifier `btech` (as in run names such as `vit_orig_btech_ce_none_s42`) denotes the **baseline recipe** (Adam, constant learning rate, plain cross-entropy) and is kept because the saved Kaggle outputs use these names.
 
 ## How to reproduce (Kaggle, 2× T4 GPU)
 

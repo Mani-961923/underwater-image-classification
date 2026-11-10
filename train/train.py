@@ -21,7 +21,7 @@ p.add_argument("--seed", type=int, default=42)
 p.add_argument("--workers", type=int, default=2)
 p.add_argument("--smoke", action="store_true")          # tiny quick run to test the code
 p.add_argument("--out", default="/kaggle/working/runs")
-p.add_argument("--eval_only", action="store_true")      # no training: load an existing run's best.pt, save TTA logits
+p.add_argument("--eval_only", action="store_true")      # no training: load an already-trained run's best.pt, save TTA logits
 args = p.parse_args()
 
 prefix = "" if args.dataset == "aqua20" else f"{args.dataset}_"
@@ -80,7 +80,7 @@ def build_model():
         print("Backbone:", BACKBONE, flush=True)
         cfg = timm.data.resolve_model_data_config(m)
         return m, (tuple(cfg["mean"]), tuple(cfg["std"]))
-    if args.model == "vit":                                        # B.Tech recipe: torchvision ViT-B/16 (ImageNet-1k)
+    if args.model == "vit":                                        # baseline recipe: torchvision ViT-B/16 (ImageNet-1k)
         BACKBONE = "torchvision vit_b_16 IMAGENET1K_V1"
         m = models.vit_b_16(weights=None if args.eval_only else "IMAGENET1K_V1")
         m.heads.head = nn.Linear(m.heads.head.in_features, NUM)
@@ -98,7 +98,7 @@ model, (MEAN, STD) = build_model()
 model = model.to(dev)
 
 # ---------------- transforms ----------------
-if args.recipe == "btech":      # as described in the B.Tech report
+if args.recipe == "btech":      # baseline recipe (standard fine-tuning: Adam, constant LR, plain CE)
     train_tf = T.Compose([T.Resize((224, 224)), T.RandomHorizontalFlip(), T.RandomRotation(15),
                           T.ColorJitter(0.2, 0.2, 0.2), T.ToTensor(), T.Normalize(MEAN, STD)])
 else:                           # improved recipe: stronger augmentation
